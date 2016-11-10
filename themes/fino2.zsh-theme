@@ -28,6 +28,26 @@ function kubes_env {
   env | grep KUBE_TARGET | sed 's/KUBE_TARGET=//'
 }
 
+function deis_env {
+  deis whoami &> /dev/null
+  if [ $? -eq 0 ]
+  then
+    deis whoami | grep -o -E 'deis.*'
+  else
+    echo 'none'
+  fi
+}
+
+function deis_user {
+  deis whoami &> /dev/null
+  if [ $? -eq 0 ]
+  then
+    deis whoami | cut -d' ' -f3
+  else
+    echo 'none'
+  fi
+}
+
 local ruby_env=''
 if which rvm-prompt &> /dev/null; then
   ruby_env=' %{$FG[243]%}‹ruby:$(rvm-prompt i v g)›%{$reset_color%}'
@@ -43,11 +63,13 @@ local prompt_char='$(prompt_char)'
 
 go_ver=' %{$FG[243]%}‹go:$(go_version)›%{$reset_color%}'
 kubes_env='%{$FG[160]%}[k8s:$(kubes_env)]%{$reset_color%}'
+deis='%{$FG[129]%}[$(deis_user)@$(deis_env)]'
+
 
 # %{$FG[239]%}at%{$reset_color%} %{$FG[033]%}$(box_name)%{$reset_color%}
 
-PROMPT="╭─%{$FG[040]%}%n%{$reset_color%} ${kubes_env} %{$FG[239]%}in%{$reset_color%} %{$terminfo[bold]$FG[226]%}${current_dir}%{$reset_color%}${git_info} %{$FG[239]%}using${go_ver}${ruby_env}
-╰─${prompt_char}%{$reset_color%} "
+PROMPT="╭─%{$FG[040]%}%n%{$reset_color%} ${kubes_env} ${deis} %{$FG[239]%}in%{$reset_color%} %{$terminfo[bold]$FG[226]%}${current_dir}%{$reset_color%}${git_info} %{$FG[239]%}using${go_ver}${ruby_env}
+╰─${prompt_char}%{$reset_color%}"
 
 ZSH_THEME_GIT_PROMPT_PREFIX=" %{$FG[239]%}on%{$reset_color%} %{$fg[255]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%{$reset_color%}"
